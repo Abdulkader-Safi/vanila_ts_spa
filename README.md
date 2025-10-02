@@ -14,29 +14,76 @@ Great for learning, experimenting, or building small-scale apps without heavy de
 - Dual templating syntax: Handlebars-style (`{{ }}`) and XML-style (`<text />`, `<each>`, `<if>`)
 - Reactive state management with Store (global & local)
 - Automatic cleanup of event listeners and subscriptions
+- **Tailwind CSS v4** integration with Vite plugin
+- Dark mode support
 - Written in clean TypeScript
 
 ---
 
 ## 🚀 Usage
 
-### 1. Install Dependencies
+### 1. Clone the project
+
+```bash
+git clone https://github.com/Abdulkader-Safi/vanilla_ts_spa.git
+# change directory to the project
+cd vanilla_ts_spa 
+```
+
+### 2. Install Dependencies
 
 ```bash
 npm install
+# or using Bun
+bun install
 ```
 
-> This project uses Vite for local development.
+> This project uses Vite for local development and Tailwind CSS v4 for styling.
 
-### 2. Run the App
-
+### 3. Run the App
 ```bash
 npm run dev
+# or using Bun
+bun run dev
 ```
 
 ### 3. Open in Browser
 
 Go to: [http://localhost:5173](http://localhost:5173)
+
+---
+
+## 🎨 Styling with Tailwind CSS
+
+This project uses **Tailwind CSS v4** (beta) for modern, utility-first styling.
+
+### Setup
+
+Tailwind is already configured and ready to use. The setup includes:
+
+- `@tailwindcss/vite` plugin in `vite.config.ts`
+- Tailwind imported in `src/style/style.css`
+- Zero configuration needed - templates are auto-detected
+
+### Using Tailwind Classes
+
+Simply add Tailwind utility classes to your HTML templates:
+
+```html
+<div class="bg-blue-500 text-white p-4 rounded-lg shadow-md hover:bg-blue-700">
+  <h1 class="text-2xl font-bold">Hello World</h1>
+</div>
+```
+
+### Dark Mode
+
+The project supports dark mode out of the box. Use `dark:` prefix for dark mode styles:
+
+```html
+<div class="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+  Content adapts to dark mode
+</div>
+```
 
 ---
 
@@ -258,15 +305,18 @@ You'd need to add:
 ```
 ├── src/
 |   ├── Core/
-│   |   ├── Router.ts   # Custom router class
-|   |   ├── View.ts     # Template engine
-|   |   └── Store.ts    # Reactive state management
+│   |   ├── Router.ts      # Custom router class
+|   |   ├── View.ts        # Template engine
+|   |   └── Store.ts       # Reactive state management
 |   ├── view/
-│   |   ├── home.html   # Home page template
-│   |   └── about.html  # About page template
-|   └── main.ts         # App entry point
-├── public/             # Static assets
-└── index.html          # Mount point
+│   |   ├── home.html      # Home page template
+│   |   └── about.html     # About page template
+|   ├── style/
+│   |   └── style.css      # Tailwind CSS imports
+|   └── main.ts            # App entry point
+├── public/                # Static assets
+├── vite.config.ts         # Vite + Tailwind configuration
+└── index.html             # Mount point
 ```
 
 ---
@@ -276,6 +326,17 @@ You'd need to add:
 - Learning routing and templating
 - Building mini apps and demos
 - Understanding SPA basics with TypeScript
+- Learning modern CSS with Tailwind CSS v4
+- Practicing reactive state management patterns
+
+---
+
+## 🛠️ Tech Stack
+
+- **TypeScript** - Type-safe JavaScript
+- **Vite** - Fast build tool and dev server
+- **Tailwind CSS v4** - Utility-first CSS framework
+- **Bun** - Fast JavaScript runtime and package manager
 
 ---
 
@@ -289,4 +350,5 @@ You'd need to add:
 - [x] Global / Local State Management
 - [x] Automatic cleanup system for subscriptions and event listeners
 - [x] Link interception for SPA navigation
+- [x] Tailwind CSS v4 integration
 - [ ] i18n Internationalization
