@@ -1,10 +1,25 @@
 <div>
-	<h1>Home Page</h1>
-	<div>
-		<h2>User <span>{{ name }}</span></h2>
+  <h1>Home Page</h1>
+  <div>
+    <h2>User <span>{{ name }}</span></h2>
 
-		{{#each users}}
-		<p>{{ name }}</p>
-		{{/each}}
-	</div>
+    {{#each users}}
+    <p>{{ name }}</p>
+    {{/each}}
+  </div>
+
+  <div
+    style="
+      margin-top: 2rem;
+      padding: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    "
+  >
+    <h3>Counter Example</h3>
+    <p>Count: <span id="count">0</span></p>
+    <button id="increment">Increment</button>
+    <button id="decrement">Decrement</button>
+    <button id="reset">Reset</button>
+  </div>
 </div>
