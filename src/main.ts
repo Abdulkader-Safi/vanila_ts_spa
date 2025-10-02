@@ -8,9 +8,11 @@ if (!root) {
 }
 const router = new Router(root);
 
-// Create a counter store
+// Create a global counter store
+// const counterStore = new Store<number>(0);
 
 router.addRoute("/", async () => {
+  // Create local a counter store
   const counterStore = new Store<number>(0);
 
   const view = await View("home.html", {
@@ -25,25 +27,30 @@ router.addRoute("/", async () => {
   const resetBtn = view.querySelector<HTMLButtonElement>("#reset");
 
   if (countElement && incrementBtn && decrementBtn && resetBtn) {
-    // Subscribe to state changes
-    counterStore.subscribe((value) => {
+    // Subscribe to state changes and store the unsubscribe function
+    const unsubscribe = counterStore.subscribe((value) => {
       countElement.innerText = value.toString();
     });
 
     // Initialize with current value
     countElement.innerText = counterStore.get().toString();
 
+    // Create event handlers
+    const handleIncrement = () => counterStore.set(counterStore.get() + 1);
+    const handleDecrement = () => counterStore.set(counterStore.get() - 1);
+    const handleReset = () => counterStore.set(0);
+
     // Add event listeners
-    incrementBtn.addEventListener("click", () => {
-      counterStore.set(counterStore.get() + 1);
-    });
+    incrementBtn.addEventListener("click", handleIncrement);
+    decrementBtn.addEventListener("click", handleDecrement);
+    resetBtn.addEventListener("click", handleReset);
 
-    decrementBtn.addEventListener("click", () => {
-      counterStore.set(counterStore.get() - 1);
-    });
-
-    resetBtn.addEventListener("click", () => {
-      counterStore.set(0);
+    // Clean up when view is removed/navigated away
+    view.addEventListener("cleanup", () => {
+      unsubscribe();
+      incrementBtn.removeEventListener("click", handleIncrement);
+      decrementBtn.removeEventListener("click", handleDecrement);
+      resetBtn.removeEventListener("click", handleReset);
     });
   }
 

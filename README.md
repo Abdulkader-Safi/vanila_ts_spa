@@ -9,10 +9,11 @@ Great for learning, experimenting, or building small-scale apps without heavy de
 
 ## ⚙️ Features
 
-- Simple client-side routing
+- Simple client-side routing with automatic link interception
 - Dynamic template rendering
 - Minimal custom templating syntax (`{{ }}`, `{{#if}}`, `{{#each}}`)
-- Reactive state management with Store
+- Reactive state management with Store (global & local)
+- Automatic cleanup of event listeners and subscriptions
 - Written in clean TypeScript
 
 ---
@@ -45,6 +46,8 @@ Go to: [http://localhost:5173](http://localhost:5173)
 
 You define routes using the `Router` class. Each route maps a path to an async component.
 
+The router automatically intercepts all internal links (starting with `/`) and handles navigation without page reloads.
+
 ```ts
 import { Router } from "./Core/Router";
 import { View } from "./Core/View";
@@ -53,7 +56,7 @@ import { Store } from "./Core/Store";
 const root = document.querySelector<HTMLDivElement>("#app")!;
 const router = new Router(root);
 
-// Create a global store
+// Create a global store (persists across navigation)
 const counterStore = new Store(0);
 
 router.addRoute("/", async () => {
@@ -61,8 +64,21 @@ router.addRoute("/", async () => {
 
   // Set up state management
   const countElement = view.querySelector("#count");
-  counterStore.subscribe((value) => {
+  const incrementBtn = view.querySelector("#increment");
+
+  // Subscribe to state changes
+  const unsubscribe = counterStore.subscribe((value) => {
     countElement.innerText = value.toString();
+  });
+
+  // Add event listener
+  const handleIncrement = () => counterStore.set(counterStore.get() + 1);
+  incrementBtn.addEventListener("click", handleIncrement);
+
+  // Clean up when navigating away
+  view.addEventListener("cleanup", () => {
+    unsubscribe();
+    incrementBtn.removeEventListener("click", handleIncrement);
   });
 
   return view;
@@ -121,6 +137,33 @@ unsubscribe();
 - Subscribe/unsubscribe pattern
 - Supports updater functions
 - No page refresh - only subscribed components update
+
+**Global vs Local State:**
+
+- **Global Store** (outside route): State persists across navigation
+- **Local Store** (inside route): State resets when navigating away
+
+```ts
+// Global - persists across pages
+const globalCounter = new Store(0);
+
+router.addRoute("/", async () => {
+  // Local - resets on navigation
+  const localCounter = new Store(0);
+  // ...
+});
+```
+
+**Automatic Cleanup:**
+
+The router dispatches a `cleanup` event when navigating away. Use it to prevent memory leaks:
+
+```ts
+view.addEventListener("cleanup", () => {
+  unsubscribe();
+  element.removeEventListener("click", handler);
+});
+```
 
 ---
 
@@ -205,4 +248,6 @@ You'd need to add:
 - [ ] Data fetching layer (like useEffect)
 - [ ] Middleware / Guards
 - [x] Global / Local State Management
+- [x] Automatic cleanup system for subscriptions and event listeners
+- [x] Link interception for SPA navigation
 - [ ] i18n Internationalization
