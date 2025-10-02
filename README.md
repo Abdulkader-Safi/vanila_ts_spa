@@ -12,6 +12,7 @@ Great for learning, experimenting, or building small-scale apps without heavy de
 - Simple client-side routing
 - Dynamic template rendering
 - Minimal custom templating syntax (`{{ }}`, `{{#if}}`, `{{#each}}`)
+- Reactive state management with Store
 - Written in clean TypeScript
 
 ---
@@ -45,17 +46,29 @@ Go to: [http://localhost:5173](http://localhost:5173)
 You define routes using the `Router` class. Each route maps a path to an async component.
 
 ```ts
-import { Router } from "./Core/Router"
-import { View } from "./Core/View"
+import { Router } from "./Core/Router";
+import { View } from "./Core/View";
+import { Store } from "./Core/Store";
 
-const root = document.querySelector<HTMLDivElement>("#app")!
-const router = new Router(root)
+const root = document.querySelector<HTMLDivElement>("#app")!;
+const router = new Router(root);
+
+// Create a global store
+const counterStore = new Store(0);
 
 router.addRoute("/", async () => {
-	return View("home.html", { name: "Safi" })
-})
+  const view = await View("home.html", { name: "Safi" });
 
-router.start()
+  // Set up state management
+  const countElement = view.querySelector("#count");
+  counterStore.subscribe((value) => {
+    countElement.innerText = value.toString();
+  });
+
+  return view;
+});
+
+router.start();
 ```
 
 ### View Function
@@ -74,10 +87,40 @@ Example:
 
 ```ts
 View("about.html", {
-	name: "Safi",
-	users: [{ name: "Alice" }, { name: "Bob" }],
-})
+  name: "Safi",
+  users: [{ name: "Alice" }, { name: "Bob" }],
+});
 ```
+
+### State Management
+
+Use the `Store` class for reactive state management. The store notifies subscribers when the state changes.
+
+```ts
+import { Store } from "./Core/Store";
+
+// Create a store with initial state
+const counterStore = new Store(0);
+
+// Subscribe to state changes
+const unsubscribe = counterStore.subscribe((value) => {
+  console.log("New value:", value);
+});
+
+// Update state
+counterStore.set(counterStore.get() + 1); // or use updater function
+counterStore.set((prev) => prev + 1);
+
+// Unsubscribe when done
+unsubscribe();
+```
+
+**Key Features:**
+
+- Generic `Store<T>` for type safety
+- Subscribe/unsubscribe pattern
+- Supports updater functions
+- No page refresh - only subscribed components update
 
 ---
 
@@ -85,14 +128,14 @@ View("about.html", {
 
 ```ts
 router.addRoute("/about", async () => {
-	return View("about.html", {
-		name: "Safi",
-		users: [{ name: "John" }, { name: "Jane" }],
-		user: {
-			isAdmin: true,
-		},
-	})
-})
+  return View("about.html", {
+    name: "Safi",
+    users: [{ name: "John" }, { name: "Jane" }],
+    user: {
+      isAdmin: true,
+    },
+  });
+});
 ```
 
 And in `about.html`:
@@ -107,9 +150,9 @@ And in `about.html`:
 {{/if}}
 
 <ul>
-	{{#each users}}
-	<li>{{name}}</li>
-	{{/each}}
+  {{#each users}}
+  <li>{{name}}</li>
+  {{/each}}
 </ul>
 ```
 
@@ -135,7 +178,8 @@ You'd need to add:
 ├── src/
 |   ├── Core/
 │   |   ├── Router.ts   # Custom router class
-|   |   └── View.ts     # Template engine
+|   |   ├── View.ts     # Template engine
+|   |   └── Store.ts    # Reactive state management
 |   └── main.ts         # App entry point
 ├── public/
 │   ├── home.html
@@ -160,5 +204,5 @@ You'd need to add:
 - [ ] Reusable Component across views
 - [ ] Data fetching layer (like useEffect)
 - [ ] Middleware / Guards
-- [ ] Global / Local State Management
+- [x] Global / Local State Management
 - [ ] i18n Internationalization
