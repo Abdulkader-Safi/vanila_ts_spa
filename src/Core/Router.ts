@@ -1,8 +1,12 @@
 // router/Router.ts
 
+type RouteParams = Record<string, string>;
+
 type Route = {
   path: string;
-  component: () => Promise<HTMLElement>;
+  component: (params: RouteParams) => Promise<HTMLElement>;
+  pattern?: RegExp;
+  paramNames?: string[];
 };
 
 export class Router {
@@ -27,8 +31,20 @@ export class Router {
     });
   }
 
-  addRoute(path: string, component: () => Promise<HTMLElement>) {
-    this.routes.push({ path, component });
+  addRoute(
+    path: string,
+    component: (params: RouteParams) => Promise<HTMLElement>
+  ) {
+    const paramNames: string[] = [];
+    const regexPath = path
+      .replace(/\/:([^\/]+)/g, (_, paramName) => {
+        paramNames.push(paramName);
+        return "/([^/]+)";
+      })
+      .replace(/\//g, "\\/");
+
+    const pattern = new RegExp(`^${regexPath}$`);
+    this.routes.push({ path, component, pattern, paramNames });
   }
 
   navigate(path: string) {
@@ -47,15 +63,31 @@ export class Router {
     }
 
     const currentPath = window.location.pathname;
-    const match = this.routes.find((r) => r.path === currentPath);
-    if (match) {
-      this.root.innerHTML = "";
-      const element = await match.component();
-      this.currentView = element;
-      this.root.appendChild(element);
-    } else {
-      this.root.innerHTML = "<h1>404 Not Found</h1>";
-      this.currentView = null;
+
+    // Try to match against route patterns
+    for (const route of this.routes) {
+      if (!route.pattern) continue;
+      const match = currentPath.match(route.pattern);
+      if (match) {
+        const params: RouteParams = {};
+
+        // Extract parameters from the match
+        if (route.paramNames) {
+          route.paramNames.forEach((paramName, index) => {
+            params[paramName] = match[index + 1];
+          });
+        }
+
+        this.root.innerHTML = "";
+        const element = await route.component(params);
+        this.currentView = element;
+        this.root.appendChild(element);
+        return;
+      }
     }
+
+    // No match found
+    this.root.innerHTML = "<h1>404 Not Found</h1>";
+    this.currentView = null;
   }
 }

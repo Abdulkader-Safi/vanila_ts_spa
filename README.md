@@ -10,6 +10,7 @@ Great for learning, experimenting, or building small-scale apps without heavy de
 ## ⚙️ Features
 
 - Simple client-side routing with automatic link interception
+- **Route parameters** support (e.g., `/user/:id`, `/post/:slug`)
 - Dynamic template rendering
 - Dual templating syntax: Handlebars-style (`{{ }}`) and XML-style (`<text />`, `<each>`, `<if>`)
 - Reactive state management with Store (global & local)
@@ -27,7 +28,7 @@ Great for learning, experimenting, or building small-scale apps without heavy de
 ```bash
 git clone https://github.com/Abdulkader-Safi/vanilla_ts_spa.git
 # change directory to the project
-cd vanilla_ts_spa 
+cd vanilla_ts_spa
 ```
 
 ### 2. Install Dependencies
@@ -41,6 +42,7 @@ bun install
 > This project uses Vite for local development and Tailwind CSS v4 for styling.
 
 ### 3. Run the App
+
 ```bash
 npm run dev
 # or using Bun
@@ -106,7 +108,7 @@ const router = new Router(root);
 // Create a global store (persists across navigation)
 const counterStore = new Store(0);
 
-router.addRoute("/", async () => {
+router.addRoute("/", async (params) => {
   const view = await View("home.html", { name: "Safi" });
 
   // Set up state management
@@ -133,6 +135,34 @@ router.addRoute("/", async () => {
 
 router.start();
 ```
+
+### Route Parameters
+
+The router supports dynamic route parameters using the `:paramName` syntax. Route components receive a `params` object containing the extracted values.
+
+```ts
+// Define a route with parameters
+router.addRoute("/user/:id", async (params) => {
+  // params.id contains the value from the URL
+  return View("user.html", {
+    userId: params.id,
+    title: `User Profile - ${params.id}`,
+  });
+});
+
+// Multiple parameters
+router.addRoute("/post/:category/:slug", async (params) => {
+  return View("post.html", {
+    category: params.category,
+    slug: params.slug,
+  });
+});
+```
+
+**Example URLs:**
+
+- `/user/123` → `params = { id: "123" }`
+- `/post/tech/my-article` → `params = { category: "tech", slug: "my-article" }`
 
 ### View Function
 
@@ -227,7 +257,7 @@ view.addEventListener("cleanup", () => {
 ## 🧪 Mini Example
 
 ```ts
-router.addRoute("/about", async () => {
+router.addRoute("/about", async (params) => {
   return View("about.html", {
     name: "Safi",
     users: [{ name: "John" }, { name: "Jane" }],
@@ -343,7 +373,7 @@ You'd need to add:
 ## TODO
 
 - [ ] add Server-Side Rendering (SSR)
-- [ ] Support Router Parameters (/user/`:id`)
+- [x] Support Router Parameters (/user/`:id`)
 - [ ] Reusable Component across views
 - [ ] Data fetching layer (like useEffect)
 - [ ] Middleware / Guards

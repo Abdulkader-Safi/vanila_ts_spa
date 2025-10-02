@@ -1,7 +1,7 @@
 import { Router } from "./Core/Router";
 import { View } from "./Core/View";
 import { Store } from "./Core/Store";
-import "./style/style.css"
+import "./style/style.css";
 
 const root = document.querySelector<HTMLDivElement>("#app");
 if (!root) {
@@ -12,7 +12,7 @@ const router = new Router(root);
 // Create a global counter store
 const counterStore = new Store<number>(0);
 
-router.addRoute("/", async () => {
+router.addRoute("/", async (params) => {
   // Create local a counter store
   // const counterStore = new Store<number>(0);
 
@@ -58,9 +58,9 @@ router.addRoute("/", async () => {
   return view;
 });
 
-router.addRoute("/about", async () => {
+router.addRoute("/about/:name", async (params) => {
   return View("about.html", {
-    name: "Safi",
+    name: params.name,
     users: [{ name: "John" }, { name: "Jane" }, { name: "Doe" }],
     user: {
       isAdmin: true,
