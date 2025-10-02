@@ -11,7 +11,7 @@ Great for learning, experimenting, or building small-scale apps without heavy de
 
 - Simple client-side routing with automatic link interception
 - Dynamic template rendering
-- Minimal custom templating syntax (`{{ }}`, `{{#if}}`, `{{#each}}`)
+- Dual templating syntax: Handlebars-style (`{{ }}`) and XML-style (`<text />`, `<each>`, `<if>`)
 - Reactive state management with Store (global & local)
 - Automatic cleanup of event listeners and subscriptions
 - Written in clean TypeScript
@@ -91,13 +91,21 @@ router.start();
 
 Use the `View(templatePath, context)` function to load an HTML template and inject dynamic data.
 
-The `templatePath` parameter should point to an HTML file located in the `public` folder.
+The `templatePath` parameter should point to an HTML file located in the `src/view` folder.
 
-It supports:
+**Templating Syntax:**
 
-- `{{ variable }}`
-- `{{#if condition}} ... {{else}} ... {{/if}}`
-- `{{#each list}} ... {{/each}}`
+The framework supports two templating syntaxes that can be used interchangeably or mixed together:
+
+**Handlebars-style Syntax:**
+- Variables: `{{ variable }}`
+- Conditionals: `{{#if condition}} ... {{else if condition}} ... {{else}} ... {{/if}}`
+- Loops: `{{#each list}} ... {{/each}}`
+
+**XML-style Syntax:**
+- Variables: `<text data="variable" />`
+- Conditionals: `<if data="condition"> ... <elseif data="condition" /> ... <else /> ... </if>`
+- Loops: `<each data="list"> ... </each>`
 
 Example:
 
@@ -181,7 +189,7 @@ router.addRoute("/about", async () => {
 });
 ```
 
-And in `about.html`:
+And in `src/view/about.html` (Handlebars-style):
 
 ```html
 <h1>Hello, {{name}}</h1>
@@ -197,6 +205,34 @@ And in `about.html`:
   <li>{{name}}</li>
   {{/each}}
 </ul>
+```
+
+Or using XML-style syntax:
+
+```html
+<h1>Hello, <text data="name" /></h1>
+
+<if data="user.isAdmin">
+  <p>You are an admin</p>
+<else />
+  <p>You are a guest</p>
+</if>
+
+<ul>
+  <each data="users">
+    <li><text data="name" /></li>
+  </each>
+</ul>
+```
+
+Or mix both styles:
+
+```html
+<h1>Hello, {{name}}</h1>
+
+<each data="users">
+  <li>{{ name }}</li>
+</each>
 ```
 
 ---
@@ -223,11 +259,12 @@ You'd need to add:
 │   |   ├── Router.ts   # Custom router class
 |   |   ├── View.ts     # Template engine
 |   |   └── Store.ts    # Reactive state management
+|   ├── view/
+│   |   ├── home.html   # Home page template
+│   |   └── about.html  # About page template
 |   └── main.ts         # App entry point
-├── public/
-│   ├── home.html
-│   └── about.html
-└── index.html      # Mount point
+├── public/             # Static assets
+└── index.html          # Mount point
 ```
 
 ---

@@ -3,15 +3,22 @@ export async function View(
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   context: Record<string, any> = {}
 ): Promise<HTMLElement> {
-  const filePath = `/${templatePath}`; // Maps to /public in Vite
+  // Use Vite's import.meta.glob to load templates
+  const templates = import.meta.glob('/src/view/**/*.html', {
+    query: '?raw',
+    eager: false
+  });
 
-  const response = await fetch(filePath);
-  if (!response.ok) {
-    alert(`Failed to load template: ${templatePath}`);
-    throw new Error(`Failed to load template: ${templatePath}`);
+  const fullPath = `/src/view/${templatePath}`;
+  const templateLoader = templates[fullPath];
+
+  if (!templateLoader) {
+    alert(`Template not found: ${templatePath}`);
+    throw new Error(`Template not found: ${templatePath}`);
   }
 
-  let html = await response.text();
+  const module = await templateLoader() as { default: string };
+  let html = module.default;
 
   // Handle XML-style loops: <each data="items">...</each>
   html = html.replace(
@@ -158,8 +165,13 @@ export async function View(
 
   const wrapper = document.createElement("div");
   wrapper.innerHTML = html.trim();
-  document.body.appendChild(wrapper);
-  return wrapper.firstElementChild as HTMLElement;
+  const element = wrapper.firstElementChild as HTMLElement;
+
+  if (!element) {
+    throw new Error(`No valid element found in template: ${templatePath}`);
+  }
+
+  return element;
 }
 
 // Helper function to access nested properties (supports dot notation)

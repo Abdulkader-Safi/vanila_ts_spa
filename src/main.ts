@@ -9,11 +9,11 @@ if (!root) {
 const router = new Router(root);
 
 // Create a global counter store
-// const counterStore = new Store<number>(0);
+const counterStore = new Store<number>(0);
 
 router.addRoute("/", async () => {
   // Create local a counter store
-  const counterStore = new Store<number>(0);
+  // const counterStore = new Store<number>(0);
 
   const view = await View("home.html", {
     name: "Safi",
