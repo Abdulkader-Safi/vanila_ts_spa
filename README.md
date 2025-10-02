@@ -98,11 +98,13 @@ The `templatePath` parameter should point to an HTML file located in the `src/vi
 The framework supports two templating syntaxes that can be used interchangeably or mixed together:
 
 **Handlebars-style Syntax:**
+
 - Variables: `{{ variable }}`
 - Conditionals: `{{#if condition}} ... {{else if condition}} ... {{else}} ... {{/if}}`
 - Loops: `{{#each list}} ... {{/each}}`
 
 **XML-style Syntax:**
+
 - Variables: `<text data="variable" />`
 - Conditionals: `<if data="condition"> ... <elseif data="condition" /> ... <else /> ... </if>`
 - Loops: `<each data="list"> ... </each>`
@@ -214,7 +216,7 @@ Or using XML-style syntax:
 
 <if data="user.isAdmin">
   <p>You are an admin</p>
-<else />
+  <else />
   <p>You are a guest</p>
 </if>
 
