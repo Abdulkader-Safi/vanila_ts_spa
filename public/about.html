@@ -18,6 +18,26 @@
     <p>Please log in.</p>
     {{/if}}
   </div>
-  
+
+  <div>
+    <h2>
+      User <span><text data="name" /></span>
+    </h2>
+
+    <each data="users">
+      <p><text data="name" /></p>
+    </each>
+  </div>
+
+  <div>
+    <if data="user.isAdmin">
+      <p>Admin Panel</p>
+    <elseif data="user.isMember" />
+      <p>Member Dashboard</p>
+    <else />
+      <p>Please log in.</p>
+    </if>
+  </div>
+
   <a href="/">home page</a>
 </div>

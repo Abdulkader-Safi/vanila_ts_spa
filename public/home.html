@@ -1,12 +1,25 @@
 <!DOCTYPE html>
 <div>
   <h1>Home Page</h1>
+
+  <h4>Templating Style 1</h4>
   <div>
     <h2>User <span>{{ name }}</span></h2>
 
     {{#each users}}
     <p>{{ name }}</p>
     {{/each}}
+  </div>
+
+  <h4>Templating Style 2</h4>
+  <div>
+    <h2>
+      User <span><text data="name" /></span>
+    </h2>
+
+    <each data="users">
+      <p><text data="name" /></p>
+    </each>
   </div>
 
   <div
@@ -23,7 +36,6 @@
     <button id="decrement">Decrement</button>
     <button id="reset">Reset</button>
   </div>
-
 
   <a href="/about">about page</a>
 </div>

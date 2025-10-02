@@ -13,6 +13,39 @@ export async function View(
 
   let html = await response.text();
 
+  // Handle XML-style loops: <each data="items">...</each>
+  html = html.replace(
+    /<each\s+data="(\w+)">([\s\S]*?)<\/each>/g,
+    (_, key, block) => {
+      const items = context[key];
+      if (!items || !Array.isArray(items)) {
+        console.warn(`"${key}" is not an array or is undefined.`);
+        return "";
+      }
+
+      return items
+        .map((item) => {
+          // Replace XML-style text tags and Handlebars-style variables
+          let itemBlock = block;
+
+          // Replace <text data="prop" /> with item value
+          // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+          itemBlock = itemBlock.replace(/<text\s+data="(\w+)"\s*\/>/g, (_: any, prop: string) => {
+            return prop in item ? String(item[prop]) : "";
+          });
+
+          // Also support Handlebars-style {{ prop }}
+          // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+          itemBlock = itemBlock.replace(/{{\s*(\w+)\s*}}/g, (_: any, prop: string) => {
+            return prop in item ? String(item[prop]) : "";
+          });
+
+          return itemBlock;
+        })
+        .join("");
+    }
+  );
+
   // Handle loops: {{#each items}}...{{/each}}
   html = html.replace(
     /{{#each\s+(\w+)}}([\s\S]*?){{\/each}}/g,
@@ -32,6 +65,46 @@ export async function View(
           });
         })
         .join("");
+    }
+  );
+
+  // Handle XML-style conditionals: <if data="condition">...</if>
+  html = html.replace(
+    /<if\s+data="([\w.]+)">([\s\S]*?)<\/if>/g,
+    (_, condition, block) => {
+      const conditionBlocks = [];
+      let elseBlock = "";
+
+      // Split block into parts: if, else if, else (support both <elseif> and <elseif />)
+      const parts = block.split(/<(elseif\s+data="[\w.]+"(?:\s*\/)?|else(?:\s*\/)?)>/);
+
+      // First part is the "if" block
+      conditionBlocks.push({ condition, content: parts[0] });
+
+      for (let i = 1; i < parts.length; i += 2) {
+        const tag = parts[i];
+        const content = parts[i + 1] || "";
+
+        if (tag.startsWith("elseif")) {
+          const elseIfMatch = tag.match(/elseif\s+data="([\w.]+)"/);
+          if (elseIfMatch) {
+            conditionBlocks.push({ condition: elseIfMatch[1], content });
+          }
+        } else if (tag.startsWith("else")) {
+          elseBlock = content;
+        }
+      }
+
+      // Evaluate conditions in order
+      for (const block of conditionBlocks) {
+        const value = getValueFromContext(context, block.condition);
+        if (value) {
+          return block.content;
+        }
+      }
+
+      // No condition matched, return else block
+      return elseBlock;
     }
   );
 
@@ -72,6 +145,11 @@ export async function View(
       return elseBlock;
     }
   );
+
+  // Handle XML-style text tags: <text data="name" />
+  html = html.replace(/<text\s+data="(\w+)"\s*\/>/g, (_, key) => {
+    return context[key] !== undefined ? String(context[key]) : "";
+  });
 
   // Handle single variables: {{ name }}
   html = html.replace(/{{\s*(\w+)\s*}}/g, (_, key) => {
