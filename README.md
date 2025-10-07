@@ -127,13 +127,18 @@ For optimal mobile performance with many pages (50+):
 
 ```typescript
 // Split routes into separate chunks
-router.addRoute("/page1", async () => (await import("./pages/Page1")).default());
-router.addRoute("/page2", async () => (await import("./pages/Page2")).default());
+router.addRoute("/page1", async () =>
+  (await import("./pages/Page1")).default()
+);
+router.addRoute("/page2", async () =>
+  (await import("./pages/Page2")).default()
+);
 ```
 
 1. **Add Route Prefetching** for better UX on likely navigation paths
 
 1. **Optimize Images**:
+
    - Use WebP format
    - Add lazy loading: `<img loading="lazy">`
    - Compress images before deployment
@@ -465,7 +470,7 @@ Or mix both styles:
 No — this is a **client-side rendered SPA**.  
 That means search engines might not index your content effectively.
 
-### If You Want SEO:
+### If You Want SEO
 
 You'd need to add:
 
@@ -476,7 +481,7 @@ You'd need to add:
 
 ## 📁 File Structure
 
-```
+```bash
 ├── src/
 |   ├── Core/
 │   |   ├── Router.ts      # Custom router class
