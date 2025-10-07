@@ -3,6 +3,7 @@
 import { registerComponent } from "../Core/ComponentRegistry";
 import { Button } from "./Button";
 import { Card } from "./Card";
+import { Container } from "./Container";
 import { SimpleButton } from "./SimpleButton";
 
 /**
@@ -12,8 +13,9 @@ import { SimpleButton } from "./SimpleButton";
 export function registerComponents(): void {
   registerComponent("c-button", Button);
   registerComponent("c-card", Card);
+  registerComponent("c-container", Container);
   registerComponent("c-simple-button", SimpleButton);
 }
 
 // Export components for programmatic usage
-export { Button, Card, SimpleButton };
+export { Button, Card, SimpleButton, Container };
