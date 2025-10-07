@@ -1,12 +1,14 @@
+import { registry } from "./ComponentRegistry";
+
 export async function View(
   templatePath: string,
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   context: Record<string, any> = {}
 ): Promise<HTMLElement> {
   // Use Vite's import.meta.glob to load templates
-  const templates = import.meta.glob('/src/view/**/*.html', {
-    query: '?raw',
-    eager: false
+  const templates = import.meta.glob("/src/view/**/*.html", {
+    query: "?raw",
+    eager: false,
   });
 
   const fullPath = `/src/view/${templatePath}`;
@@ -17,7 +19,7 @@ export async function View(
     throw new Error(`Template not found: ${templatePath}`);
   }
 
-  const module = await templateLoader() as { default: string };
+  const module = (await templateLoader()) as { default: string };
   let html = module.default;
 
   // Handle XML-style loops: <each data="items">...</each>
@@ -36,16 +38,20 @@ export async function View(
           let itemBlock = block;
 
           // Replace <text data="prop" /> with item value
-          // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-          itemBlock = itemBlock.replace(/<text\s+data="(\w+)"\s*\/>/g, (_: any, prop: string) => {
-            return prop in item ? String(item[prop]) : "";
-          });
+          itemBlock = itemBlock.replace(
+            /<text\s+data="(\w+)"\s*\/>/g,
+            (_: any, prop: string) => {
+              return prop in item ? String(item[prop]) : "";
+            }
+          );
 
           // Also support Handlebars-style {{ prop }}
-          // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-          itemBlock = itemBlock.replace(/{{\s*(\w+)\s*}}/g, (_: any, prop: string) => {
-            return prop in item ? String(item[prop]) : "";
-          });
+          itemBlock = itemBlock.replace(
+            /{{\s*(\w+)\s*}}/g,
+            (_: any, prop: string) => {
+              return prop in item ? String(item[prop]) : "";
+            }
+          );
 
           return itemBlock;
         })
@@ -67,7 +73,7 @@ export async function View(
         .map((item) => {
           // Replace variables inside the loop block
           // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-                    return block.replace(/{{\s*(\w+)\s*}}/g, (_: any, prop: string) => {
+          return block.replace(/{{\s*(\w+)\s*}}/g, (_: any, prop: string) => {
             return prop in item ? String(item[prop]) : "";
           });
         })
@@ -83,7 +89,9 @@ export async function View(
       let elseBlock = "";
 
       // Split block into parts: if, else if, else (support both <elseif> and <elseif />)
-      const parts = block.split(/<(elseif\s+data="[\w.]+"(?:\s*\/)?|else(?:\s*\/)?)>/);
+      const parts = block.split(
+        /<(elseif\s+data="[\w.]+"(?:\s*\/)?|else(?:\s*\/)?)>/
+      );
 
       // First part is the "if" block
       conditionBlocks.push({ condition, content: parts[0] });
@@ -170,6 +178,9 @@ export async function View(
   if (!element) {
     throw new Error(`No valid element found in template: ${templatePath}`);
   }
+
+  // Render all registered components within the element
+  registry.renderComponents(element);
 
   return element;
 }

@@ -13,6 +13,7 @@ Great for learning, experimenting, or building small-scale apps without heavy de
 - **Route parameters** support (e.g., `/user/:id`, `/post/:slug`)
 - Dynamic template rendering
 - Dual templating syntax: Handlebars-style (`{{ }}`) and XML-style (`<text />`, `<each>`, `<if>`)
+- **Reusable component system** with custom HTML tags
 - Reactive state management with Store (global & local)
 - Automatic cleanup of event listeners and subscriptions
 - **Tailwind CSS v4** integration with Vite plugin
@@ -261,6 +262,83 @@ View("about.html", {
 });
 ```
 
+### Reusable Components
+
+The framework includes a powerful component system that allows you to create reusable UI components that can be used across all views.
+
+**Creating a Component:**
+
+```typescript
+import { Component, ComponentProps } from "./Core/Component";
+
+interface ButtonProps extends ComponentProps {
+  label?: string;
+  variant?: "primary" | "secondary";
+  onClick?: () => void;
+}
+
+export class Button extends Component<ButtonProps> {
+  render(): HTMLElement {
+    const { label = "Click me", variant = "primary" } = this.props;
+
+    const button = this.createElement(
+      "button",
+      {
+        className: `btn-${variant}`,
+      },
+      [label]
+    );
+
+    if (this.props.onClick) {
+      this.addEventListener(button, "click", this.props.onClick);
+    }
+
+    return button;
+  }
+}
+```
+
+**Registering Components:**
+
+```typescript
+import { registerComponent } from "./Core/ComponentRegistry";
+import { Button } from "./components/Button";
+
+// Register with a custom tag name (must contain a hyphen)
+registerComponent("c-button", Button);
+```
+
+**Using Components in Templates:**
+
+```html
+<!-- Use components with custom tags -->
+<c-button label="Submit" variant="primary"></c-button>
+<c-button label="Cancel" variant="secondary"></c-button>
+
+<!-- Components can be nested -->
+<c-card title="My Card">
+  <c-button label="Action"></c-button>
+</c-card>
+```
+
+**Component Features:**
+
+- ✅ Type-safe props with TypeScript
+- ✅ Automatic cleanup on navigation
+- ✅ Lifecycle methods (`mount`, `unmount`)
+- ✅ Event handling with automatic cleanup
+- ✅ Support for slots/children content
+- ✅ State management integration
+- ✅ Can be used in templates or programmatically
+
+**Built-in Components:**
+
+- `<c-button>`: Button with variants and sizes
+- `<c-card>`: Card container with title, subtitle, and slots
+- `<c-counter>`: Stateful counter component
+
+[View Components Demo](/components)
+
 ### State Management
 
 Use the `Store` class for reactive state management. The store notifies subscribers when the state changes.
@@ -440,7 +518,7 @@ You'd need to add:
 
 - [ ] add Server-Side Rendering (SSR)
 - [x] Support Router Parameters (/user/`:id`)
-- [ ] Reusable Component across views
+- [x] Reusable Component system across views
 - [ ] Data fetching layer (like useEffect)
 - [ ] Middleware / Guards
 - [x] Global / Local State Management
@@ -451,3 +529,5 @@ You'd need to add:
 - [x] Service Worker with offline capabilities
 - [x] Performance optimizations (code splitting, caching)
 - [ ] i18n Internationalization
+- [ ] Component library (more built-in components)
+- [ ] Virtual DOM for better performance
