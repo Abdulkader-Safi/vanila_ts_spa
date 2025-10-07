@@ -17,6 +17,9 @@ Great for learning, experimenting, or building small-scale apps without heavy de
 - Automatic cleanup of event listeners and subscriptions
 - **Tailwind CSS v4** integration with Vite plugin
 - Dark mode support
+- **Progressive Web App (PWA)** support with offline capabilities
+- Optimized performance with code splitting and caching strategies
+- Service Worker with automatic updates
 - Written in clean TypeScript
 
 ---
@@ -86,6 +89,69 @@ The project supports dark mode out of the box. Use `dark:` prefix for dark mode 
   Content adapts to dark mode
 </div>
 ```
+
+---
+
+## 📱 Progressive Web App (PWA)
+
+This project is configured as a Progressive Web App, allowing it to be installed on mobile devices and work offline.
+
+### PWA Features
+
+- **Installable**: Add to home screen on mobile devices
+- **Offline Support**: Works without internet connection using Service Worker
+- **Auto-Update**: Service worker automatically updates in the background
+- **Optimized Caching**: Smart caching strategies for assets, images, and API calls
+- **Fast Loading**: Cached resources load instantly on repeat visits
+
+### Performance Optimizations
+
+The project includes several performance optimizations:
+
+1. **Code Splitting**: Each route can be lazy-loaded, reducing initial bundle size
+2. **Terser Minification**: Production builds are optimized with console.log removal
+3. **Manual Chunking**: Vendor code separated for better caching
+4. **CSS Code Splitting**: Styles loaded on-demand
+5. **Service Worker Caching**:
+   - Images cached for 30 days (CacheFirst)
+   - JS/CSS cached with StaleWhileRevalidate (7 days)
+   - Fonts cached for 1 year
+   - Maximum cache size: 3MB per file
+
+### Building for Mobile
+
+For optimal mobile performance with many pages (50+):
+
+1. **Use Lazy Loading**:
+
+```typescript
+// Split routes into separate chunks
+router.addRoute("/page1", async () => (await import("./pages/Page1")).default());
+router.addRoute("/page2", async () => (await import("./pages/Page2")).default());
+```
+
+1. **Add Route Prefetching** for better UX on likely navigation paths
+
+1. **Optimize Images**:
+   - Use WebP format
+   - Add lazy loading: `<img loading="lazy">`
+   - Compress images before deployment
+
+1. **Template Caching**: The View function automatically caches loaded templates
+
+### Installation
+
+To add PWA icons, place these files in the `public/` folder:
+
+- `pwa-64x64.png`
+- `pwa-192x192.png`
+- `pwa-512x512.png`
+- `maskable-icon-512x512.png`
+- `apple-touch-icon.png`
+- `mask-icon.svg`
+- `favicon.ico`
+
+You can generate these using [PWA Asset Generator](https://github.com/elegantapp/pwa-asset-generator) or [RealFaviconGenerator](https://realfavicongenerator.net/).
 
 ---
 
@@ -381,4 +447,7 @@ You'd need to add:
 - [x] Automatic cleanup system for subscriptions and event listeners
 - [x] Link interception for SPA navigation
 - [x] Tailwind CSS v4 integration
+- [x] Progressive Web App (PWA) support
+- [x] Service Worker with offline capabilities
+- [x] Performance optimizations (code splitting, caching)
 - [ ] i18n Internationalization
