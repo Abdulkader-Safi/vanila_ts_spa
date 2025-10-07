@@ -31,26 +31,25 @@ export class Button extends Component<ButtonProps> {
 
     const disabledClasses = disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer";
 
-    const button = this.createElement(
+    // Using the new h() helper for cleaner, JSX-like syntax
+    return this.h(
       "button",
       {
-        className: `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${disabledClasses}`,
-        type: "button",
-        disabled: disabled.toString(),
+        class: `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${disabledClasses}`,
+        attrs: {
+          type: "button",
+          disabled: disabled.toString(),
+        },
+        on: {
+          click: (e) => {
+            if (!disabled && this.props.onClick) {
+              e.preventDefault();
+              this.props.onClick();
+            }
+          },
+        },
       },
-      [label]
+      label
     );
-
-    // Add click handler if provided
-    if (this.props.onClick) {
-      this.addEventListener(button, "click", (e) => {
-        if (!disabled && this.props.onClick) {
-          e.preventDefault();
-          this.props.onClick();
-        }
-      });
-    }
-
-    return button;
   }
 }

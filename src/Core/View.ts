@@ -2,8 +2,7 @@ import { registry } from "./ComponentRegistry";
 
 export async function View(
   templatePath: string,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  context: Record<string, any> = {}
+  context: Record<string, unknown> = {}
 ): Promise<HTMLElement> {
   // Use Vite's import.meta.glob to load templates
   const templates = import.meta.glob("/src/view/**/*.html", {
@@ -40,16 +39,16 @@ export async function View(
           // Replace <text data="prop" /> with item value
           itemBlock = itemBlock.replace(
             /<text\s+data="(\w+)"\s*\/>/g,
-            (_: any, prop: string) => {
-              return prop in item ? String(item[prop]) : "";
+            (_match: string, prop: string) => {
+              return prop in item ? String(item[prop as keyof typeof item]) : "";
             }
           );
 
           // Also support Handlebars-style {{ prop }}
           itemBlock = itemBlock.replace(
             /{{\s*(\w+)\s*}}/g,
-            (_: any, prop: string) => {
-              return prop in item ? String(item[prop]) : "";
+            (_match: string, prop: string) => {
+              return prop in item ? String(item[prop as keyof typeof item]) : "";
             }
           );
 
@@ -72,9 +71,8 @@ export async function View(
       return items
         .map((item) => {
           // Replace variables inside the loop block
-          // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-          return block.replace(/{{\s*(\w+)\s*}}/g, (_: any, prop: string) => {
-            return prop in item ? String(item[prop]) : "";
+          return block.replace(/{{\s*(\w+)\s*}}/g, (_match: string, prop: string) => {
+            return prop in item ? String(item[prop as keyof typeof item]) : "";
           });
         })
         .join("");
@@ -186,12 +184,16 @@ export async function View(
 }
 
 // Helper function to access nested properties (supports dot notation)
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-function getValueFromContext(ctx: Record<string, any>, path: string) {
+function getValueFromContext(ctx: Record<string, unknown>, path: string): unknown {
   return path
     .split(".")
-    .reduce(
-      (obj, key) => (obj && obj[key] !== undefined ? obj[key] : undefined),
+    .reduce<unknown>(
+      (obj, key) => {
+        if (obj && typeof obj === "object" && key in obj) {
+          return (obj as Record<string, unknown>)[key];
+        }
+        return undefined;
+      },
       ctx
     );
 }

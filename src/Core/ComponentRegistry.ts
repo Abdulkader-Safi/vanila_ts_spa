@@ -7,7 +7,7 @@ type ComponentConstructor<P extends ComponentProps = ComponentProps> = new (
 ) => Component<P>;
 
 class ComponentRegistry {
-  private components: Map<string, ComponentConstructor<any>> = new Map();
+  private components: Map<string, ComponentConstructor<ComponentProps>> = new Map();
 
   /**
    * Register a component with a custom tag name
@@ -23,7 +23,7 @@ class ComponentRegistry {
         `Component "${tagName}" is already registered. Overwriting...`
       );
     }
-    this.components.set(tagName, componentClass);
+    this.components.set(tagName, componentClass as unknown as ComponentConstructor<ComponentProps>);
   }
 
   /**
@@ -39,7 +39,7 @@ class ComponentRegistry {
   get<P extends ComponentProps>(
     tagName: string
   ): ComponentConstructor<P> | undefined {
-    return this.components.get(tagName);
+    return this.components.get(tagName) as ComponentConstructor<P> | undefined;
   }
 
   /**
@@ -54,7 +54,7 @@ class ComponentRegistry {
       console.error(`Component "${tagName}" is not registered`);
       return null;
     }
-    return new ComponentClass(props);
+    return new ComponentClass(props) as Component<P>;
   }
 
   /**
@@ -65,23 +65,24 @@ class ComponentRegistry {
 
     // Parse all attributes
     for (const attr of Array.from(element.attributes)) {
-      let value: any = attr.value;
+      const strValue = attr.value;
+      let value: unknown = strValue;
 
       // Try to parse as JSON for complex types
-      if (value.startsWith("{") || value.startsWith("[")) {
+      if (strValue.startsWith("{") || strValue.startsWith("[")) {
         try {
-          value = JSON.parse(value);
+          value = JSON.parse(strValue);
         } catch (e) {
           // Keep as string if not valid JSON
         }
       }
       // Parse boolean attributes
-      else if (value === "true" || value === "false") {
-        value = value === "true";
+      else if (strValue === "true" || strValue === "false") {
+        value = strValue === "true";
       }
       // Parse numbers
-      else if (!Number.isNaN(Number(value)) && value !== "") {
-        value = Number(value);
+      else if (!Number.isNaN(Number(strValue)) && strValue !== "") {
+        value = Number(strValue);
       }
 
       // Convert kebab-case to camelCase

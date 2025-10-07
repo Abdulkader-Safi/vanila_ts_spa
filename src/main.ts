@@ -16,7 +16,7 @@ const router = new Router(root);
 // Create a global counter store
 const counterStore = new Store<number>(0);
 
-router.addRoute("/", async (params) => {
+router.addRoute("/", async () => {
   // Create local a counter store
   // const counterStore = new Store<number>(0);
 
@@ -72,8 +72,10 @@ router.addRoute("/about/:name", async (params) => {
   });
 });
 
-router.addRoute("/components", async (params) => {
-  return View("components-demo.html", {});
+router.addRoute("/components", async () => {
+  const view = await View("components-demo.html", {});
+
+  return view;
 });
 
 router.start();
