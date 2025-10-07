@@ -3,6 +3,28 @@ import { VitePWA } from "vite-plugin-pwa";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
+  build: {
+    // Performance optimizations
+    minify: "terser",
+    terserOptions: {
+      compress: {
+        drop_console: true, // Remove console.log in production
+        drop_debugger: true,
+      },
+    },
+    rollupOptions: {
+      output: {
+        // Manual chunking for better caching
+        manualChunks: {
+          vendor: ["tailwindcss"],
+        },
+      },
+    },
+    // Enable CSS code splitting
+    cssCodeSplit: true,
+    // Increase chunk size warning limit
+    chunkSizeWarningLimit: 1000,
+  },
   plugins: [
     tailwindcss(),
     VitePWA({
@@ -45,6 +67,12 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2}"],
+        // Optimize caching strategies
+        cleanupOutdatedCaches: true,
+        skipWaiting: true,
+        clientsClaim: true,
+        // Reduce bundle size by excluding large files
+        maximumFileSizeToCacheInBytes: 3000000, // 3MB
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -57,6 +85,30 @@ export default defineConfig({
               },
               cacheableResponse: {
                 statuses: [0, 200],
+              },
+            },
+          },
+          {
+            // Cache images with NetworkFirst strategy
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "images-cache",
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+            },
+          },
+          {
+            // Cache JS/CSS with StaleWhileRevalidate
+            urlPattern: /\.(?:js|css)$/,
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "static-resources",
+              expiration: {
+                maxEntries: 60,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
               },
             },
           },
