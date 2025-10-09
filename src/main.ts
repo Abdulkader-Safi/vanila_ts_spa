@@ -1,11 +1,7 @@
 import { Router } from "./Core/Router";
 import { View } from "./Core/View";
 import { Store } from "./Core/Store";
-import { registerComponents } from "./components";
 import "./style/style.css";
-
-// Register all reusable components
-registerComponents();
 
 const root = document.querySelector<HTMLDivElement>("#app");
 if (!root) {
@@ -70,12 +66,6 @@ router.addRoute("/about/:name", async (params) => {
       isAdmin: true,
     },
   });
-});
-
-router.addRoute("/components", async () => {
-  const view = await View("components-demo.html", {});
-
-  return view;
 });
 
 router.start();

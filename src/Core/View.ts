@@ -1,5 +1,3 @@
-import { registry } from "./ComponentRegistry";
-
 export async function View(
   templatePath: string,
   context: Record<string, unknown> = {}
@@ -176,9 +174,6 @@ export async function View(
   if (!element) {
     throw new Error(`No valid element found in template: ${templatePath}`);
   }
-
-  // Render all registered components within the element
-  registry.renderComponents(element);
 
   return element;
 }
